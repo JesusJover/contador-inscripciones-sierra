@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Inscripciones</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500&family=Playfair+Display:wght@400;600;800&display=swap');
+        * {
+            font-family: 'Oswald', sans-serif;
+        }
+   </style>
+</head>
+<body>
+    <div class="drop-shadow-md bg-green-400 text-white p-5 w-screen h-screen flex flex-col justify-between items-center">
+        <img class="max-w-[100px]" src="carrera.png" alt="">
+        <div id="info-inscripciones">
+            <h1 class="text-sm">INSCRIPCIONES RESTANTES</h1>
+            <h1 class="font-bold text-7xl text-center text-yellow-200" id="inscripciones"></h1>
+        </div>  
+        <h2 class="text-2xl" id="cronometro"></h2>
+    </div>
+    <script type="module">
+        import { io } from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js";
+        const socket = io('ws://localhost:4000')
+
+        const contador = document.getElementById('inscripciones')
+        socket.on('libres', (arg) => {
+            contador.innerHTML = arg;
+            console.log(arg)
+        })
+
+        const idElemento = 'cronometro'
+
+        function iniciarCronometro(idElemento) {
+        let elemento = document.getElementById(idElemento);
+        let tiempoInicio = new Date(1699189200*1000);
+
+        function actualizarCronometro() {
+            let tiempoActual = Date.now();
+            let tiempoTranscurrido = tiempoActual - tiempoInicio;
+
+            let segundos = Math.floor(tiempoTranscurrido / 1000);
+            let minutos = Math.floor(segundos / 60);
+            let horas = Math.floor(minutos / 60);
+
+            segundos %= 60;
+            minutos %= 60;
+
+            // const infoInscripciones = document.getElementById('info-inscripciones')
+            // if (tiempoTranscurrido < 0) {
+            //     infoInscripciones.style.display = "none"
+            // } else {
+            //     infoInscripciones.style.display = "inherit"
+            // }
+
+            // Formateo para asegurar que siempre se muestren 2 dígitos en los números
+            let tiempoFormateado = `${Math.abs(horas).toString().padStart(2, '0')}:${Math.abs(minutos).toString().padStart(2, '0')}:${Math.abs(segundos).toString().padStart(2, '0')}`;
+            
+            elemento.textContent = tiempoFormateado;
+        }
+
+        actualizarCronometro(); // Actualizar al inicio para evitar un segundo de retraso
+        setInterval(actualizarCronometro, 1000); // Actualizar cada segundo
+    }
+
+    // Ejemplo de uso: iniciar el cronómetro en un elemento con ID "cronometro"
+    iniciarCronometro('cronometro');
+    </script>
+</body>
+</html>

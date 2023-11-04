@@ -1,0 +1,9 @@
+{
+  "type": "module",
+  "dependencies": {
+    "@turf/turf": "^6.5.0",
+    "node-cron": "^3.0.2",
+    "puppeteer": "^21.4.1",
+    "socket.io": "^4.7.2"
+  }
+}
