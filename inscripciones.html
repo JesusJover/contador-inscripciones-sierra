@@ -13,14 +13,20 @@
    </style>
 </head>
 <body>
-    <div class="drop-shadow-md bg-green-400 text-white p-5 w-screen h-screen flex flex-col justify-between items-center">
-        <img class="max-w-[100px]" src="carrera.png" alt="">
-        <div id="info-inscripciones">
-            <h1 class="text-sm">INSCRIPCIONES RESTANTES</h1>
-            <h1 class="font-bold text-7xl text-center text-yellow-200" id="inscripciones"></h1>
+    <div class="flex flex-row p-3 bg-green-400 items-center w-screen h-screen">
+        <div class="w-full drop-shadow-md text-white p-2 flex flex-col justify-between items-center">
+            <img class="max-w-[100px]" src="carrera.png" alt="">
+            <div id="info-inscripciones" class="flex flex-col">
+                <h1 class="drop-shadow-md text-sm">INSCRIPCIONES RESTANTES</h1>
+                <h1 class="drop-shadow-md font-bold text-7xl text-center text-[#FFFF00]" id="inscripciones"></h1>
+            </div> 
+            <h2 class="text-6xl drop-shadow-md text-[#FFFF00]" id="cronometro-grande"></h2>
+            <h2 class="text-2xl drop-shadow-md" id="cronometro"></h2>
+        </div>
+        <div>
+            <h3 class="text-[8px] text-center pb-2 text-[#FFFF00] drop-shadow-md">ESCANEAME PARA INSCRIBIRTE</h3>
+            <img class="w-[80px] h-[80px]" src="https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=https://www.inscripcionesweb.es/es/evento/sierra2023.zhtm" alt="">
         </div>  
-        <h2 class="text-2xl" id="cronometro"></h2>
-    </div>
     <script type="module">
         import { io } from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js";
         const socket = io('ws://localhost:4000')
@@ -35,10 +41,16 @@
 
         function iniciarCronometro(idElemento) {
         let elemento = document.getElementById(idElemento);
+
+        const infoInscripciones = document.getElementById('info-inscripciones')
+        const cronometro = document.getElementById('cronometro')
+        const cronometroGrande = document.getElementById('cronometro-grande')
+
         let tiempoInicio = new Date(1699189200*1000);
+        tiempoInicio = new Date(1699193757*1000)
 
         function actualizarCronometro() {
-            let tiempoActual = Date.now();
+            let tiempoActual = new Date()
             let tiempoTranscurrido = tiempoActual - tiempoInicio;
 
             let segundos = Math.floor(tiempoTranscurrido / 1000);
@@ -48,16 +60,20 @@
             segundos %= 60;
             minutos %= 60;
 
-            // const infoInscripciones = document.getElementById('info-inscripciones')
-            // if (tiempoTranscurrido < 0) {
-            //     infoInscripciones.style.display = "none"
-            // } else {
-            //     infoInscripciones.style.display = "inherit"
-            // }
+            if (tiempoTranscurrido < 0) {
+                infoInscripciones.style.display = "none"
+                cronometro.style.opacity = "0"
+                cronometroGrande.style.display = "inherit"
+            } else {
+                infoInscripciones.style.display = "flex"
+                cronometro.style.opacity = "1"
+                cronometroGrande.style.display = "none"
+            }
 
             // Formateo para asegurar que siempre se muestren 2 dígitos en los números
             let tiempoFormateado = `${Math.abs(horas).toString().padStart(2, '0')}:${Math.abs(minutos).toString().padStart(2, '0')}:${Math.abs(segundos).toString().padStart(2, '0')}`;
-            
+            tiempoFormateado = new Date(Math.abs(tiempoTranscurrido)).toLocaleTimeString('es-ES', { timeZone: 'UTC'})
+
             elemento.textContent = tiempoFormateado;
         }
 
@@ -67,6 +83,7 @@
 
     // Ejemplo de uso: iniciar el cronómetro en un elemento con ID "cronometro"
     iniciarCronometro('cronometro');
+    iniciarCronometro('cronometro-grande')
     </script>
 </body>
 </html>
