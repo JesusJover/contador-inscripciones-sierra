@@ -13,19 +13,22 @@
    </style>
 </head>
 <body>
-    <div class="flex flex-row p-3 bg-green-400 items-center w-screen h-screen">
-        <div class="w-full drop-shadow-md text-white p-2 flex flex-col justify-between items-center">
-            <img class="max-w-[100px]" src="carrera.png" alt="">
+    <div class="flex flex-row p-3 items-center w-screen h-screen bg-[url(fondo2.webp)] bg-cover bg-center">
+        <div class="w-full text-white p-2 flex flex-col justify-between items-center gap-3">
+            <img class="max-w-[300px]" src="carrera.webp" alt="">
             <div id="info-inscripciones" class="flex flex-col">
-                <h1 class="drop-shadow-md text-sm">INSCRIPCIONES RESTANTES</h1>
-                <h1 class="drop-shadow-md font-bold text-7xl text-center text-[#FFFF00]" id="inscripciones"></h1>
+                <h1 class="drop-shadow-md text-sm text-[#B58346]">INSCRIPCIONES RESTANTES</h1>
+                <h1 class="drop-shadow-md font-bold text-7xl text-center text-[#B58346]" id="inscripciones"></h1>
             </div> 
-            <h2 class="text-6xl drop-shadow-md text-[#FFFF00]" id="cronometro-grande"></h2>
-            <h2 class="text-2xl drop-shadow-md" id="cronometro"></h2>
+            <div class="flex flex-col items-center" id="seccion-cronometro-grande">
+                <h1 class="text-sm text-[#B58346]">APERTURA DE INSCRIPCIONES EN:</h1>
+                <h2 class="text-6xl text-[#B58346]" id="cronometro-grande"></h2>
+            </div>
+            <h2 class="text-2xl text-[#B58346]" id="cronometro"></h2>
         </div>
         <div>
-            <h3 class="text-[8px] text-center pb-2 text-[#FFFF00] drop-shadow-md">ESCANEAME PARA INSCRIBIRTE</h3>
-            <img class="w-[80px] h-[80px]" src="https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=https://www.inscripcionesweb.es/es/evento/sierra2023.zhtm" alt="">
+            <h3 class="text-[10px] text-center pb-2 text-[#B58346]">ESCANEAME PARA INSCRIBIRTE</h3>
+            <img class="w-[90px] h-[90px] mix-blend-multiply" src="https://api.qrserver.com/v1/create-qr-code/?size=600x600&color=B58346&format=svg&data=https://www.inscripcionesweb.es/es/evento/sierra2023.zhtm" alt="">
         </div>  
     <script type="module">
         import { io } from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js";
@@ -44,10 +47,10 @@
 
         const infoInscripciones = document.getElementById('info-inscripciones')
         const cronometro = document.getElementById('cronometro')
-        const cronometroGrande = document.getElementById('cronometro-grande')
+        const seccionCronometroGrande = document.getElementById('seccion-cronometro-grande')
 
-        let tiempoInicio = new Date(1699189200*1000);
-        tiempoInicio = new Date(1699193757*1000)
+        let tiempoInicio = new Date(1730552400*1000);
+        // tiempoInicio = new Date(1699193757*1000)
 
         function actualizarCronometro() {
             let tiempoActual = new Date()
@@ -63,11 +66,11 @@
             if (tiempoTranscurrido < 0) {
                 infoInscripciones.style.display = "none"
                 cronometro.style.opacity = "0"
-                cronometroGrande.style.display = "inherit"
+                seccionCronometroGrande.style.display = "inherit"
             } else {
                 infoInscripciones.style.display = "flex"
                 cronometro.style.opacity = "1"
-                cronometroGrande.style.display = "none"
+                seccionCronometroGrande.style.display = "none"
             }
 
             // Formateo para asegurar que siempre se muestren 2 dígitos en los números

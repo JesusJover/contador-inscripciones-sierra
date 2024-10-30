@@ -11,7 +11,8 @@ const io = new Server(httpServer, {
     }
 });
 
-const eventoUrl = 'http://www.inscripcionesweb.es/es/evento/sierra2023.zhtm'
+const eventoUrl = 'https://www.inscripcionesweb.es/es/evento/metasport2024.zhtm'
+let plazasLibres = 0
 
 const obtenerInscripcionesLibres = async (eventoUrl) => {
     const browser = await puppeteer.launch({
@@ -46,12 +47,17 @@ const obtenerInscripcionesLibres = async (eventoUrl) => {
 //     console.log(plazasOcupadas)
 // })
 
+cron.schedule('*/15 * * * * *', async () => {
+    plazasLibres = await obtenerInscripcionesLibres(eventoUrl)
+    console.log(plazasLibres, new Date())
+})
+
 io.on('connection', (socket) => {
     console.log('connected socket')
-    cron.schedule('*/15 * * * * *', async () => {
-        const plazasLibres = await obtenerInscripcionesLibres(eventoUrl)
+    cron.schedule('*/5 * * * * *', async () => {
+        // const plazasLibres = await obtenerInscripcionesLibres(eventoUrl)
         socket.emit('libres', plazasLibres)
-        console.log(plazasLibres, new Date())
+        // console.log(plazasLibres, new Date())
     })
 })
 
