@@ -1,45 +1,39 @@
-# syntax = docker/dockerfile:1
+# Usa la imagen base de Node.js
+FROM node:18-slim
 
-# Adjust NODE_VERSION as desired
-ARG NODE_VERSION=20.15.0
-FROM node:${NODE_VERSION}-slim as base
+# Instala las dependencias necesarias para Puppeteer
+RUN apt-get update && apt-get install -y \
+    wget \
+    ca-certificates \
+    fonts-liberation \
+    libasound2 \
+    libatk1.0-0 \
+    libatk-bridge2.0-0 \
+    libcups2 \
+    libdrm2 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxrandr2 \
+    libgbm1 \
+    libnss3 \
+    libxss1 \
+    libgl1 \
+    libxkbcommon0 \
+    xdg-utils \
+    && rm -rf /var/lib/apt/lists/*
 
-LABEL fly_launch_runtime="Node.js"
-
-# Node.js app lives here
+# Establece el directorio de trabajo
 WORKDIR /app
 
-# Set production environment
-ENV NODE_ENV="production"
+# Copia el package.json e instala las dependencias
+COPY package.json .
+RUN npm install
 
-
-# Throw-away build stage to reduce size of final image
-FROM base as build
-
-# Install packages needed to build node modules
-RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential node-gyp pkg-config python-is-python3
-
-# Install node modules
-COPY package-lock.json package.json ./
-RUN npm ci
-
-# Copy application code
+# Copia el código de la aplicación
 COPY . .
 
+# Expone el puerto
+EXPOSE 4000
 
-# Final stage for app image
-FROM base
-
-# Install packages needed for deployment
-RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y chromium chromium-sandbox && \
-    rm -rf /var/lib/apt/lists /var/cache/apt/archives
-
-# Copy built application
-COPY --from=build /app /app
-
-# Start the server by default, this can be overwritten at runtime
-EXPOSE 3000
-ENV PUPPETEER_EXECUTABLE_PATH="/usr/bin/chromium"
-CMD [ "node", "index.js" ]
+# Ejecuta la aplicación
+CMD ["node", "index.js"]

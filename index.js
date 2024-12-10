@@ -11,19 +11,23 @@ const io = new Server(httpServer, {
     }
 });
 
-const eventoUrl = 'https://www.inscripcionesweb.es/es/evento/metasport2024.zhtm'
+const eventoUrl = 'https://www.inscripcionesweb.es/es/evento/sierra2024.zhtm'
 let plazasLibres = 0
 
 const obtenerInscripcionesLibres = async (eventoUrl) => {
     const browser = await puppeteer.launch({
-        headless: "new",
-        defaultViewport: null,
+        headless: true,
+        // args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
+        // headless:false,
+        args: ["--no-sandbox"],
+        // executablePath: '/usr/bin/google-chrome',
     })
     let plazasRestantes
     try {
         const page = await browser.newPage()
         await page.goto(eventoUrl, {
             waitUntil: "domcontentloaded",
+            timeout: 10000,
         })
 
         await page.waitForSelector('.info_plazas')
@@ -48,9 +52,15 @@ const obtenerInscripcionesLibres = async (eventoUrl) => {
 // })
 
 cron.schedule('*/15 * * * * *', async () => {
-    plazasLibres = await obtenerInscripcionesLibres(eventoUrl)
+    try {
+        plazasLibres = await obtenerInscripcionesLibres(eventoUrl)
+    } catch (e) {
+        console.error(e)
+    }
     console.log(plazasLibres, new Date())
 })
+
+// plazasLibres = await obtenerInscripcionesLibres(eventoUrl)
 
 io.on('connection', (socket) => {
     console.log('connected socket')

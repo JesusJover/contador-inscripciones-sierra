@@ -14,8 +14,8 @@
 </head>
 <body>
     <div class="flex flex-row p-3 items-center w-screen h-screen bg-[url(fondo2.webp)] bg-cover bg-center">
-        <div class="w-full text-white p-2 flex flex-col justify-between items-center gap-3">
-            <img class="max-w-[300px]" src="carrera.webp" alt="">
+        <div class="w-full text-white p-2 flex flex-col justify-between items-center gap-2">
+            <img class="max-w-[200px]" src="carrera.webp" alt="">
             <div id="info-inscripciones" class="flex flex-col">
                 <h1 class="drop-shadow-md text-sm text-[#B58346]">INSCRIPCIONES RESTANTES</h1>
                 <h1 class="drop-shadow-md font-bold text-7xl text-center text-[#B58346]" id="inscripciones"></h1>
@@ -32,7 +32,7 @@
         </div>  
     <script type="module">
         import { io } from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js";
-        const socket = io('ws://localhost:4000')
+        const socket = io('ws://contador-inscripciones-sierra.fly.dev')
 
         const contador = document.getElementById('inscripciones')
         socket.on('libres', (arg) => {
@@ -49,7 +49,7 @@
         const cronometro = document.getElementById('cronometro')
         const seccionCronometroGrande = document.getElementById('seccion-cronometro-grande')
 
-        let tiempoInicio = new Date(1730552400*1000);
+        let tiempoInicio = new Date(173055240*1000);
         // tiempoInicio = new Date(1699193757*1000)
 
         function actualizarCronometro() {
