@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-height, initial-scale=3.0, minimum-scale=3.0">
     <script src="https://cdn.tailwindcss.com"></script>
     <title>Inscripciones</title>
     <style>
@@ -14,25 +14,27 @@
 </head>
 <body>
     <div class="flex flex-row p-3 items-center w-screen h-screen bg-[url(fondo2.webp)] bg-cover bg-center">
-        <div class="w-full text-white p-2 flex flex-col justify-between items-center gap-2">
-            <img class="max-w-[200px]" src="carrera.webp" alt="">
+        <div style="zoom: 4;" class="w-full text-white p-2 flex flex-col justify-between items-center gap-2">
+            <img class="max-w-[180px]" src="carrera.png" alt="">
             <div id="info-inscripciones" class="flex flex-col">
-                <h1 class="drop-shadow-md text-sm text-[#B58346]">INSCRIPCIONES RESTANTES</h1>
-                <h1 class="drop-shadow-md font-bold text-7xl text-center text-[#B58346]" id="inscripciones"></h1>
+                <h1 class="drop-shadow-md text-sm text-[#F37336]">INSCRIPCIONES RESTANTES</h1>
+                <h1 class="drop-shadow-md font-bold text-7xl text-center text-[#F37336]" id="inscripciones"></h1>
             </div> 
             <div class="flex flex-col items-center" id="seccion-cronometro-grande">
-                <h1 class="text-sm text-[#B58346]">APERTURA DE INSCRIPCIONES EN:</h1>
-                <h2 class="text-6xl text-[#B58346]" id="cronometro-grande"></h2>
+                <h1 class="text-sm text-[#F37336]">APERTURA DE INSCRIPCIONES EN:</h1>
+                <h2 class="text-6xl text-[#F37336]" id="cronometro-grande"></h2>
             </div>
-            <h2 class="text-2xl text-[#B58346]" id="cronometro"></h2>
+            <h2 class="text-2xl text-[#F37336]" id="cronometro"></h2>
         </div>
-        <div>
-            <h3 class="text-[10px] text-center pb-2 text-[#B58346]">ESCANEAME PARA INSCRIBIRTE</h3>
-            <img class="w-[90px] h-[90px] mix-blend-multiply" src="https://api.qrserver.com/v1/create-qr-code/?size=600x600&color=B58346&format=svg&data=https://www.inscripcionesweb.es/es/evento/sierra2023.zhtm" alt="">
-        </div>  
+        <div style="zoom: 4;" class="mr-4">
+            <h3 class="text-[10px] text-center pb-2 text-[#F37336]">ESCANEA PARA INSCRIBIRTE</h3>
+            <img class="w-[90px] h-[90px] mix-blend-multiply" src="https://api.qrserver.com/v1/create-qr-code/?size=600x600&color=F37336&format=svg&data=https://www.inscripcionesweb.es/es/evento/sierra25.zhtm" alt="">
+        </div> 
+
     <script type="module">
         import { io } from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js";
-        const socket = io('ws://contador-inscripciones-sierra.fly.dev')
+        let socket = io('ws://contador-inscripciones-sierra.fly.dev')
+        socket = io('ws://localhost:4000')
 
         const contador = document.getElementById('inscripciones')
         socket.on('libres', (arg) => {
@@ -49,8 +51,7 @@
         const cronometro = document.getElementById('cronometro')
         const seccionCronometroGrande = document.getElementById('seccion-cronometro-grande')
 
-        let tiempoInicio = new Date(173055240*1000);
-        // tiempoInicio = new Date(1699193757*1000)
+        let tiempoInicio = new Date(1763206200*1000);
 
         function actualizarCronometro() {
             let tiempoActual = new Date()

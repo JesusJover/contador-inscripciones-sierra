@@ -11,7 +11,8 @@ const io = new Server(httpServer, {
     }
 });
 
-const eventoUrl = 'https://www.inscripcionesweb.es/es/evento/sierra2024.zhtm'
+// const eventoUrl = 'https://www.inscripcionesweb.es/es/evento/sierra2024.zhtm'
+const eventoUrl = 'https://www.inscripcionesweb.es/es/evento/sierra25.zhtm'
 let plazasLibres = 0
 
 const obtenerInscripcionesLibres = async (eventoUrl) => {

@@ -1,10 +1,10 @@
-# fly.toml app configuration file generated for contador-inscripciones-sierra on 2024-10-29T09:24:02+01:00
+# fly.toml app configuration file generated for contador-inscripciones-sierra on 2025-11-14T11:29:11+01:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
 app = 'contador-inscripciones-sierra'
-primary_region = 'mad'
+primary_region = 'cdg'
 
 [build]
 
