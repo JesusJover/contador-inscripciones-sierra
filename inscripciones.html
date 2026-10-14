@@ -6,88 +6,103 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <title>Inscripciones</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500&family=Playfair+Display:wght@400;600;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Playfair+Display:wght@400;600;800&display=swap');
         * {
             font-family: 'Oswald', sans-serif;
         }
    </style>
 </head>
-<body>
-    <div class="flex flex-row p-3 items-center w-screen h-screen bg-[url(fondo2.webp)] bg-cover bg-center">
+<body class="bg-[#F3EDE1]">
+    <div class="relative flex flex-row p-3 items-center w-screen h-screen bg-[url(fondo2.webp)] bg-cover bg-center overflow-hidden">
         <div style="zoom: 4;" class="w-full text-white p-2 flex flex-col justify-between items-center gap-2">
-            <img class="max-w-[180px]" src="carrera.png" alt="">
-            <div id="info-inscripciones" class="flex flex-col">
-                <h1 class="drop-shadow-md text-sm text-[#F37336]">INSCRIPCIONES RESTANTES</h1>
-                <h1 class="drop-shadow-md font-bold text-7xl text-center text-[#F37336]" id="inscripciones"></h1>
+            <img class="max-w-[180px]" src="carrera.png" alt="XII Carrera Popular Sierra 2026">
+            <div id="info-inscripciones" class="flex flex-col items-center">
+                <h1 class="drop-shadow-md text-sm text-[#111111] font-bold tracking-wide">INSCRIPCIONES RESTANTES</h1>
+                <h1 class="drop-shadow-md font-bold text-7xl text-center text-[#DB1F1E]" id="inscripciones"></h1>
             </div> 
             <div class="flex flex-col items-center" id="seccion-cronometro-grande">
-                <h1 class="text-sm text-[#F37336]">APERTURA DE INSCRIPCIONES EN:</h1>
-                <h2 class="text-6xl text-[#F37336]" id="cronometro-grande"></h2>
+                <h1 class="text-sm text-[#111111] font-bold tracking-wide">APERTURA DE INSCRIPCIONES EN:</h1>
+                <h2 class="text-6xl text-[#DB1F1E] font-bold" id="cronometro-grande"></h2>
             </div>
-            <h2 class="text-2xl text-[#F37336]" id="cronometro"></h2>
+            <h2 class="text-2xl text-[#DB1F1E] font-bold" id="cronometro"></h2>
         </div>
         <div style="zoom: 4;" class="mr-4">
-            <h3 class="text-[10px] text-center pb-2 text-[#F37336]">ESCANEA PARA INSCRIBIRTE</h3>
-            <img class="w-[90px] h-[90px] mix-blend-multiply" src="https://api.qrserver.com/v1/create-qr-code/?size=600x600&color=F37336&format=svg&data=https://www.inscripcionesweb.es/es/evento/sierra25.zhtm" alt="">
+            <h3 class="text-[10px] text-center pb-2 text-[#111111] font-bold">ESCANEA PARA INSCRIBIRTE</h3>
+            <img class="w-[90px] h-[90px] mix-blend-multiply" src="https://api.qrserver.com/v1/create-qr-code/?size=600x600&color=DB1F1E&format=svg&data=https://www.inscripcionesweb.es/es/evento/sierra26.zhtm" alt="Código QR inscripción">
         </div> 
+
+        <!-- Pegatina "I Love Sierra" abajo a la derecha con efecto adhesivo -->
+        <div class="absolute bottom-5 right-6 pointer-events-none select-none z-10">
+            <img src="pegatina.png" alt="I Love Sierra" class="w-52 md:w-64 lg:w-72 transform -rotate-[7deg] filter drop-shadow-[0_10px_16px_rgba(0,0,0,0.30)] drop-shadow-[0_2px_4px_rgba(0,0,0,0.18)]">
+        </div>
 
     <script type="module">
         import { io } from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js";
         let socket = io('ws://contador-inscripciones-sierra.fly.dev')
         socket = io('ws://localhost:4000')
 
+        const params = new URLSearchParams(window.location.search);
+        let simulandoAbiertas = params.has('simular') || params.has('abiertas');
+        const plazasPorUrl = params.get('plazas');
+        let plazasSimuladasDefault = plazasPorUrl ? parseInt(plazasPorUrl) : 485;
+
         const contador = document.getElementById('inscripciones')
         socket.on('libres', (arg) => {
-            contador.innerHTML = arg;
+            if (!params.has('plazas')) {
+                contador.innerHTML = arg;
+            }
             console.log(arg)
         })
-
-        const idElemento = 'cronometro'
-
-        function iniciarCronometro(idElemento) {
-        let elemento = document.getElementById(idElemento);
 
         const infoInscripciones = document.getElementById('info-inscripciones')
         const cronometro = document.getElementById('cronometro')
         const seccionCronometroGrande = document.getElementById('seccion-cronometro-grande')
+        const cronometroGrande = document.getElementById('cronometro-grande')
 
-        let tiempoInicio = new Date(1763206200*1000);
+        // Apertura inscripciones Sierra 2026: 17/10/2026 12:30 (UTC+2) -> 1792233000
+        const tiempoInicioReal = new Date(1792233000 * 1000);
+        let tiempoInicioSimulado = new Date(Date.now() - 15 * 60 * 1000); // 15 min transcurridos
 
-        function actualizarCronometro() {
-            let tiempoActual = new Date()
-            let tiempoTranscurrido = tiempoActual - tiempoInicio;
-
-            let segundos = Math.floor(tiempoTranscurrido / 1000);
-            let minutos = Math.floor(segundos / 60);
-            let horas = Math.floor(minutos / 60);
-
-            segundos %= 60;
-            minutos %= 60;
-
-            if (tiempoTranscurrido < 0) {
-                infoInscripciones.style.display = "none"
-                cronometro.style.opacity = "0"
-                seccionCronometroGrande.style.display = "inherit"
-            } else {
-                infoInscripciones.style.display = "flex"
-                cronometro.style.opacity = "1"
-                seccionCronometroGrande.style.display = "none"
+        function toggleSimulacion() {
+            simulandoAbiertas = !simulandoAbiertas;
+            if (simulandoAbiertas) {
+                tiempoInicioSimulado = new Date(Date.now() - 15 * 60 * 1000);
             }
-
-            // Formateo para asegurar que siempre se muestren 2 dígitos en los números
-            let tiempoFormateado = `${Math.abs(horas).toString().padStart(2, '0')}:${Math.abs(minutos).toString().padStart(2, '0')}:${Math.abs(segundos).toString().padStart(2, '0')}`;
-            tiempoFormateado = new Date(Math.abs(tiempoTranscurrido)).toLocaleTimeString('es-ES', { timeZone: 'UTC'})
-
-            elemento.textContent = tiempoFormateado;
+            actualizarCronometros();
         }
 
-        actualizarCronometro(); // Actualizar al inicio para evitar un segundo de retraso
-        setInterval(actualizarCronometro, 1000); // Actualizar cada segundo
-    }
+        // Atajo de teclado: pulsar 'S' para alternar la simulación de inscripciones abiertas
+        window.addEventListener('keydown', (e) => {
+            if ((e.key === 's' || e.key === 'S') && e.target.tagName !== 'INPUT') {
+                toggleSimulacion();
+            }
+        });
 
-    // Ejemplo de uso: iniciar el cronómetro en un elemento con ID "cronometro"
-    iniciarCronometro('cronometro');
-    iniciarCronometro('cronometro-grande')
+        function actualizarCronometros() {
+            const tiempoInicio = simulandoAbiertas ? tiempoInicioSimulado : tiempoInicioReal;
+            const tiempoActual = new Date();
+            const tiempoTranscurrido = tiempoActual - tiempoInicio;
+
+            if (tiempoTranscurrido < 0) {
+                infoInscripciones.style.display = "none";
+                cronometro.style.opacity = "0";
+                seccionCronometroGrande.style.display = "inherit";
+            } else {
+                infoInscripciones.style.display = "flex";
+                cronometro.style.opacity = "1";
+                seccionCronometroGrande.style.display = "none";
+                if (simulandoAbiertas && (!contador.innerHTML || contador.innerHTML === '0' || params.has('plazas'))) {
+                    contador.innerHTML = plazasSimuladasDefault;
+                }
+            }
+
+            const tiempoFormateado = new Date(Math.abs(tiempoTranscurrido)).toLocaleTimeString('es-ES', { timeZone: 'UTC' });
+            cronometro.textContent = tiempoFormateado;
+            cronometroGrande.textContent = tiempoFormateado;
+        }
+
+        actualizarCronometros();
+        setInterval(actualizarCronometros, 1000);
     </script>
 </body>
 </html>

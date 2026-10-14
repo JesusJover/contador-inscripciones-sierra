@@ -11,17 +11,14 @@ const io = new Server(httpServer, {
     }
 });
 
-// const eventoUrl = 'https://www.inscripcionesweb.es/es/evento/sierra2024.zhtm'
-const eventoUrl = 'https://www.inscripcionesweb.es/es/evento/sierra25.zhtm'
-let plazasLibres = 0
+const eventoUrl = 'https://www.inscripcionesweb.es/es/evento/sierra26.zhtm?mostrar_inscritos=1'
+const PLAZAS_TOTALES = 500
+let plazasLibres = PLAZAS_TOTALES
 
 const obtenerInscripcionesLibres = async (eventoUrl) => {
     const browser = await puppeteer.launch({
         headless: true,
-        // args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
-        // headless:false,
         args: ["--no-sandbox"],
-        // executablePath: '/usr/bin/google-chrome',
     })
     let plazasRestantes
     try {
@@ -31,13 +28,31 @@ const obtenerInscripcionesLibres = async (eventoUrl) => {
             timeout: 10000,
         })
 
-        await page.waitForSelector('.info_plazas')
-        const plazasOcupadas = await page.evaluate(() => {
-            const plazasOcupadas = document.querySelector('.info_plazas > p').innerHTML
-            return plazasOcupadas
-        })
-        const elements = plazasOcupadas.split('</strong>')
-        plazasRestantes = parseInt(elements[2])
+        plazasRestantes = await page.evaluate((defaultTotal) => {
+            // Estrategia 1: Selector clásico en .info_plazas si existiera un párrafo con las plazas libres
+            const paragraphs = Array.from(document.querySelectorAll('.info_plazas > p'))
+            const plazaP = paragraphs.find(p => {
+                const html = p.innerHTML.toLowerCase()
+                return html.split('</strong>').length >= 3 && (html.includes('plaza') || html.includes('libre'))
+            })
+            if (plazaP) {
+                const elements = plazaP.innerHTML.split('</strong>')
+                const parsed = parseInt(elements[2])
+                if (!isNaN(parsed)) return parsed
+            }
+
+            // Estrategia 2: Conteo de la lista de inscritos (?mostrar_inscritos=1)
+            const table = document.querySelector('table.table')
+            if (table) {
+                const rows = document.querySelectorAll('table.table tbody tr')
+                const inscritos = rows.length
+                const matchTotal = document.body.innerText.match(/LIMITE\s+INSCRITOS:\s*(\d+)/i)
+                const total = matchTotal ? parseInt(matchTotal[1]) : defaultTotal
+                return Math.max(0, total - inscritos)
+            }
+
+            return defaultTotal
+        }, PLAZAS_TOTALES)
     } catch (e) {
         console.error(e)
     } finally {
@@ -46,29 +61,26 @@ const obtenerInscripcionesLibres = async (eventoUrl) => {
     return plazasRestantes
 }
 
-// const plazasOcupadas = obtenerInscripcionesLibres(eventoUrl, plazasTotales)
-// // Wait for the promise to resolve
-// plazasOcupadas.then(plazasOcupadas => {
-//     console.log(plazasOcupadas)
-// })
-
 cron.schedule('*/15 * * * * *', async () => {
     try {
-        plazasLibres = await obtenerInscripcionesLibres(eventoUrl)
+        const libres = await obtenerInscripcionesLibres(eventoUrl)
+        if (libres !== undefined && !isNaN(libres)) {
+            plazasLibres = libres
+        }
     } catch (e) {
         console.error(e)
     }
     console.log(plazasLibres, new Date())
 })
 
-// plazasLibres = await obtenerInscripcionesLibres(eventoUrl)
-
 io.on('connection', (socket) => {
     console.log('connected socket')
-    cron.schedule('*/5 * * * * *', async () => {
-        // const plazasLibres = await obtenerInscripcionesLibres(eventoUrl)
+    socket.emit('libres', plazasLibres)
+    const task = cron.schedule('*/5 * * * * *', async () => {
         socket.emit('libres', plazasLibres)
-        // console.log(plazasLibres, new Date())
+    })
+    socket.on('disconnect', () => {
+        task.stop()
     })
 })
 
