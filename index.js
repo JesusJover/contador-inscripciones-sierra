@@ -1,13 +1,13 @@
 import puppeteer from 'puppeteer'
 import cron from 'node-cron'
-import { createServer } from "http";
-import { Server } from "socket.io";
+import { createServer } from 'http'
+import { Server } from 'socket.io'
 
-const httpServer = createServer();
+const httpServer = createServer()
 const io = new Server(httpServer, {
     cors: {
-      origin: "*",
-      methods: ["GET", "POST"]
+        origin: "*",
+        methods: ["GET", "POST"]
     }
 });
 
@@ -15,13 +15,30 @@ const eventoUrl = 'https://www.inscripcionesweb.es/es/evento/sierra26.zhtm?mostr
 const PLAZAS_TOTALES = 500
 let plazasLibres = PLAZAS_TOTALES
 
+const launchBrowser = async () => {
+    try {
+        return await puppeteer.launch({
+            headless: true,
+            args: ["--no-sandbox"],
+        })
+    } catch (err) {
+        // Fallback al Chrome instalado en el sistema si la caché de Puppeteer no está descargada
+        if (err.message && err.message.includes('Could not find Chrome')) {
+            return await puppeteer.launch({
+                headless: true,
+                channel: 'chrome',
+                args: ["--no-sandbox"],
+            })
+        }
+        throw err
+    }
+}
+
 const obtenerInscripcionesLibres = async (eventoUrl) => {
-    const browser = await puppeteer.launch({
-        headless: true,
-        args: ["--no-sandbox"],
-    })
+    let browser
     let plazasRestantes
     try {
+        browser = await launchBrowser()
         const page = await browser.newPage()
         await page.goto(eventoUrl, {
             waitUntil: "domcontentloaded",
@@ -56,7 +73,7 @@ const obtenerInscripcionesLibres = async (eventoUrl) => {
     } catch (e) {
         console.error(e)
     } finally {
-        await browser.close()
+        if (browser) await browser.close()
     }
     return plazasRestantes
 }
